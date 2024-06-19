@@ -114,14 +114,6 @@ template <class var_type, class coefs_type>
 PID_controller<var_type, coefs_type>::PID_controller(float dt) : time_step(dt) {}
 
 template <class var_type, class coefs_type>
-PID_controller<var_type, coefs_type>::PID_controller(var_type min_integral_sum, var_type max_integral_sum) {	
-	if (max_integral_sum > min_integral_sum) {
-		min_int = min_integral_sum;
-		max_int = max_integral_sum;
-	}
-}
-
-template <class var_type, class coefs_type>
 void PID_controller<var_type, coefs_type>::set_coefficients(coefs_type new_k_p, coefs_type new_k_i, coefs_type new_k_d) {
     set_kp(new_k_p);
     set_ki(new_k_i);
