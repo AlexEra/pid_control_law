@@ -1,8 +1,17 @@
 #if !defined(__PID_CONTROLLER_H__)
 #define __PID_CONTROLLER_H__
 
+namespace pidCtrl {
 
-template <class var_type, class coefs_type>
+template<typename T>
+concept var_type_t = requires (T value) {
+	value + value;
+	value - value;
+	value * value;
+	value / value;
+};
+
+template <var_type_t var_type, var_type_t coefs_type>
 class PID_controller {
 protected:
 	var_type prev_err{0};			// previous error value
@@ -14,22 +23,6 @@ protected:
 	float time_step{0.001};			// discretization step
 	coefs_type k_p, k_i, k_d;		// controller coefficients
 public:
-	/**
-	 * @brief Default empty constructor
-	 */	
-	PID_controller() {}
-
-	/**
-	 * @brief Constructor with discretization time argument
-	 * @param dt Time step (default value is 0.001)
-	 */
-	PID_controller(float dt);
-
-	/**
-	 * @brief Default empty destructor
-	 */
-	~PID_controller() {}
-
 	/**
 	 * @brief Controller coefficients setter
 	 * @param new_k_p New proportional coefficient value
@@ -110,35 +103,33 @@ public:
 };
 
 //////////////////////////////
-template <class var_type, class coefs_type>
-PID_controller<var_type, coefs_type>::PID_controller(float dt) : time_step(dt) {}
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::set_coefficients(coefs_type new_k_p, coefs_type new_k_i, coefs_type new_k_d) {
     set_kp(new_k_p);
     set_ki(new_k_i);
     set_kd(new_k_d);
 }
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::set_kp(coefs_type new_k_p) {k_p = new_k_p;}
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::set_ki(coefs_type new_k_i) {k_i = new_k_i * time_step;}
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::set_kd(coefs_type new_k_d) {k_d = new_k_d / time_step;}
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 coefs_type PID_controller<var_type, coefs_type>::get_kp(void) {return k_p;}
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 coefs_type PID_controller<var_type, coefs_type>::get_ki(void) {return k_i / time_step;}
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 coefs_type PID_controller<var_type, coefs_type>::get_kd(void) {return k_d * time_step;}
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::set_time_step(float dt) {
 	coefs_type tmp_k_i = k_i / time_step; // backup
 	coefs_type tmp_k_d = k_d * time_step; // backup
@@ -148,7 +139,7 @@ void PID_controller<var_type, coefs_type>::set_time_step(float dt) {
 	set_kd(tmp_k_d);
 }
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::set_integral_limits(var_type min_signal, var_type max_signal) {
 	if (max_signal > min_signal) {
 		min_int = min_signal;
@@ -156,7 +147,7 @@ void PID_controller<var_type, coefs_type>::set_integral_limits(var_type min_sign
 	}
 }
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::set_control_limits(var_type left_ctrl, var_type right_ctrl) {
 	if (right_ctrl >= left_ctrl) {
 		control_left_lim = left_ctrl;
@@ -164,7 +155,7 @@ void PID_controller<var_type, coefs_type>::set_control_limits(var_type left_ctrl
 	}
 }
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 var_type PID_controller<var_type, coefs_type>::step(var_type current_val, var_type target_val) {
 	var_type output_signal; // value to return
 	var_type err = target_val - current_val; // control error computing
@@ -181,9 +172,12 @@ var_type PID_controller<var_type, coefs_type>::step(var_type current_val, var_ty
 	return output_signal;
 }
 
-template <class var_type, class coefs_type>
+template <var_type_t var_type, var_type_t coefs_type>
 void PID_controller<var_type, coefs_type>::clear(void) {
 	integral = 0;
 	prev_err = 0;
 }
+
+} /* namespace pidCtrl */
+
 #endif // __PID_CONTROLLER_H__
